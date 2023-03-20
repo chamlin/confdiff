@@ -1,2 +1,6 @@
 # confdiff
-normalize the xml config files so it's easy to diff
+
+normalize the xml config files so it's easy to diff, for example via
+
+mvim -d
+
