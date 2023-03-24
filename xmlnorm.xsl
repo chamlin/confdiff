@@ -33,7 +33,7 @@
                         '=', string($e/scalar-type), '+', string($e/collation))"
                 />
             </xsl:when>
-            <xsl:when test="node-name($e) = $parent-local-qnames">
+            <xsl:when test="node-name($e) = QName('http://marklogic.com/xdmp/database', 'range-path-indexes')">
                 <xsl:value-of
                     select="concat(string($e/path-expression), '+', string($e/collation), '+', string($e/type))"
                 />
