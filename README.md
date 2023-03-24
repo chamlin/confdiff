@@ -16,3 +16,11 @@ set 'debug' param to true to show the keys preceding the elements in the output.
 
 add to the sortkey function as needed.
 
+Example QC code:
+
+```xquery
+let $xsl := xdmp:document-get ('/Users/chamlin/git/confdiff/xmlnorm.xsl')
+let $xml := xdmp:document-get ('/Users/chamlin/git/confdiff/aws.xml')
+let $new := xdmp:xslt-eval ($xsl, $xml)
+return $new
+```
