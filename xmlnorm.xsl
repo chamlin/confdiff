@@ -5,14 +5,18 @@
 
     <xsl:output indent="yes"/>
 
+    <xsl:param name="debug" select="false()"/>
+
+
     <xsl:variable name="parent-local-qnames" as="xs:QName+">
         <xsl:sequence
             select="
-                for $s in ('range-element-indexes', 'range-element-attribute-indexes', 'element-word-lexicons', 'phrase-arounds', 'phrase-throughs', 'element-word-query-throughs')
+                for $s in ('range-element-index', 'range-element-attribute-index', 'element-word-lexicon', 'phrase-around', 'phrase-through', 'element-word-query-through')
                 return
                     QName('http://marklogic.com/xdmp/database', $s)"
         />
     </xsl:variable>
+
 
     <!-- create a sort key for various element types -->
     <xsl:function name="xmlnorm:sortkey" as="xs:string">
@@ -24,19 +28,40 @@
             </xsl:when>
             <xsl:when
                 test="node-name($e) eq QName('http://marklogic.com/xdmp/database', 'path-namespaces')">
-                <xsl:value-of select="concat(string($e/namespace-uri), '=', string($e/prefix))"/>
+                <xsl:choose>
+                    <xsl:when test="$e/*">
+                        <xsl:value-of
+                            select="concat(string($e/db:namespace-uri), '=', string($e/db:prefix))"
+                        />
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="string(node-name($e))"/>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:when>
             <xsl:when test="node-name($e) = $parent-local-qnames">
                 <xsl:value-of
                     select="
-                        concat(string($e/parent-namespace-uri), ':', string($e/parent-localname), '/', string($e/namespace-uri), ':', string($e/localname),
-                        '=', string($e/scalar-type), '+', string($e/collation))"
+                        concat(string($e/db:parent-namespace-uri), ':', string($e/db:parent-localname), '/', string($e/db:namespace-uri), ':', string($e/db:localname),
+                        '=', string($e/db:scalar-type), '+', string($e/db:collation))"
                 />
             </xsl:when>
-            <xsl:when test="node-name($e) = QName('http://marklogic.com/xdmp/database', 'range-path-indexes')">
+            <xsl:when
+                test="node-name($e) = QName('http://marklogic.com/xdmp/database', 'range-path-index')">
                 <xsl:value-of
-                    select="concat(string($e/path-expression), '+', string($e/collation), '+', string($e/type))"
+                    select="concat(string($e/db:path-expression), '+', string($e/db:collation), '+', string($e/db:type))"
                 />
+            </xsl:when>
+            <xsl:when test="node-name($e) = QName('http://marklogic.com/xdmp/database', 'field')">
+                <xsl:value-of select="string($e/db:field-name)"/>
+            </xsl:when>
+            <xsl:when
+                test="node-name($e) = QName('http://marklogic.com/xdmp/database', 'tokenizer-override')">
+                <xsl:value-of select="string($e/db:character)"/>
+            </xsl:when>
+            <xsl:when
+                test="node-name($e) = QName('http://marklogic.com/xdmp/database', 'range-field-index')">
+                <xsl:value-of select="string($e/db:field-name)"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="string(node-name($e))"/>
@@ -62,7 +87,11 @@
                 <xsl:sort>
                     <xsl:value-of select="xmlnorm:sortkey(.)"/>
                 </xsl:sort>
-                <!-- <xsl:value-of select="xmlnorm:sortkey(.)"/> -->
+                <xsl:if test="$debug">
+                    <sortkey>
+                        <xsl:value-of select="xmlnorm:sortkey(.)"/>
+                    </sortkey>
+                </xsl:if>
                 <xsl:apply-templates select="."/>
             </xsl:for-each>
             <!-- is this stuff wacky?  what about mixed content?  doesn't happen in configs? -->
