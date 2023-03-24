@@ -75,7 +75,7 @@
         <xsl:element name="{node-name(.)}">999</xsl:element>
     </xsl:template>
 
-    <xsl:template match="element()">
+    <xsl:template match="element()" name="element-processor">
         <xsl:copy>
             <xsl:for-each select="@*">
                 <xsl:sort>
