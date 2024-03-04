@@ -2,25 +2,20 @@
 
 normalize the xml config files so it's easy to diff, for example via
 
-mvim -d
+macvim -d dbs1.xml dbs2.xml
 
-It does this by sorting the elements by name or by more specific identifiers.
+It does this by sorting the elements/attributes by name or by more specific identifiers.  IDs are normalized to a single value.
 
-First, working on databases.xml
+Works on databases.xml
 
-Tested in ancient Oxygen and MarkLogic 11.
+Tested in MarkLogic 11 QC.
 
-Testing means:  looked OK on one databases.xml.
+Testing means:  looked OK on one pair of databases.xml.
 
 set 'debug' param to true to show the keys preceding the elements in the output.
 
 add to the sortkey function as needed.
 
-Example QC code:
 
-```xquery
-let $xsl := xdmp:document-get ('/Users/chamlin/git/confdiff/xmlnorm.xsl')
-let $xml := xdmp:document-get ('/Users/chamlin/git/confdiff/aws.xml')
-let $new := xdmp:xslt-eval ($xsl, $xml)
-return $new
-```
+
+Ignore the xslt.  I'll get rid of it or update it someday.
