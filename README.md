@@ -8,7 +8,7 @@ It does this by sorting the elements/attributes by name or by more specific iden
 
 Works on databases.xml.
 
-**NOTE:  the output is used for diff analysis.  It can't be used as configuration for MarkLogic Server.**
+***NOTE:  the output is used for diff analysis.  It can't be used as configuration for MarkLogic Server.***
 
 set 'debug' param to true to show the keys preceding the elements in the output.
 
