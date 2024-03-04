@@ -6,7 +6,9 @@ macvim -d dbs1.xml dbs2.xml
 
 It does this by sorting the elements/attributes by name or by more specific identifiers.  IDs are normalized to a single value.
 
-Works on databases.xml
+Works on databases.xml.
+
+*NOTE:  the output is used for diff analysis.  It can't be used as configuration for MarkLogic Server.*
 
 set 'debug' param to true to show the keys preceding the elements in the output.
 
