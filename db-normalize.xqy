@@ -1,18 +1,36 @@
+xquery version "1.0-ml";
+
 declare namespace db = 'http://marklogic.com/xdmp/database';
+declare namespace a = 'http://marklogic.com/xdmp/assignments';
+
 (: pretty print :)
 declare option xdmp:indent 'yes';
 
+declare variable $config-dir := '/path/to/configuration-dir/';
+declare variable $dbsxml := xdmp:document-get ($config-dir||'databases.xml');
+declare variable $axml := xdmp:document-get ($config-dir||'assignments.xml');
+
 declare variable $local:debug := fn:false();
 
-declare function local:sort-key ($node as node()) as xs:string {
+declare function local:forest-name-from-id ($forest-id) {
+    ($axml//a:assignment[a:forest-id/fn:data() = $forest-id]/a:forest-name/fn:string(), '#######')[1]
+};
+
+declare function local:sort-key ($node as node()) {
   typeswitch($node)
       case element() return 
           if (fn:node-name ($node) eq xs:QName ('db:database')) then
               fn:string ($node/db:database-name)
+          else if (fn:node-name ($node) = (xs:QName ('db:field'), xs:QName ('db:range-field-index'))) then
+              fn:string ($node/db:field-name)
+          else if (fn:node-name ($node) eq xs:QName ('db:field-path')) then
+              fn:string ($node/db:path)
           else if (fn:node-name ($node) eq xs:QName ('db:path-namespace')) then
               concat(fn:string($node/db:namespace-uri), '=', fn:string($node/db:prefix))
+          else if (fn:node-name ($node) eq xs:QName ('db:forest-id')) then
+              fn:count ($node/preceding-sibling::db:forest-id)
           else if (fn:exists ($node/db:localname)) then
-              fn:string-join ($node/(db:parent-localname|db:localname)/fn:string(), '+')
+              fn:string-join (($node/db:localname,$node/db:parent-localname,$node/db:namespace-uri)/fn:string(), '+')
           else
               fn:local-name ($node)
       case attribute() return 
@@ -54,8 +72,10 @@ declare function local:change ($node) {
       case comment() return
           $node
       case text() return 
-          if (fn:node-name ($node/parent::*) = (('db:forest-id', 'db:database-id') ! xs:QName (.))) then
-                '999999'
+          if (fn:node-name ($node/parent::*) = ('db:database-id' ! xs:QName (.))) then
+                '#######'
+          else if (fn:node-name ($node/parent::*) = ('db:forest-id' ! xs:QName (.))) then
+                ($axml//a:assignment[a:forest-id/fn:data() = xs:unsignedLong($node)]/a:forest-name/fn:string(), '#######')[1]
           else 
                 $node
       case element() return 
@@ -80,12 +100,9 @@ declare function local:change ($node) {
       default return fn:error(xs:QName("ERROR"), 'huh? local:change of '||xdmp:describe ($node, (), ()))
 };
 
-
-let $xml := xdmp:document-get ('/Users/hamlin/git/confdiff/databases-test.xml')
-let $new := local:change ($xml)
+let $new := local:change ($dbsxml)
 return (
-    $new,
-    xdmp:save ('/Users/hamlin/git/confdiff/x.xml', document {$new} )
+    xdmp:save ('/Users/hamlin/tmp/new.xml', document {$new} )
 )
 
 
